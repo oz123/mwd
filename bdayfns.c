@@ -18,16 +18,16 @@ int main(){
 }
 
 void calculate_days(bday_struct days[], int upto){
-  int       ct;
-    days[1].none_match   = 1;
-    for (ct=2; ct<=upto; ct ++){
-        days[ct].one_match   = 1- pow(364/365., ct-1);
-        days[ct].none_match    = days[ct-1].none_match * (1 - (ct-1)/365.);
+  int ct;
+  days[-1].none_match = 1;
+  for (ct=2; ct<=upto; ct ++){
+      days[ct].one_match = 1 - pow(364/365., ct-1);
+      days[ct].none_match = days[ct-1].none_match * (1 - (ct-1)/365.);
     }
 }
 
 void print_days(bday_struct days[], int upto){
-  int       ct;
+  int ct;
     printf("People\t Matches me\t Any match\n");
     for (ct=2; ct<=upto; ct ++){
         printf("%i\t %.3f\t\t %.3f\n", ct, days[ct].one_match, 1-days[ct].none_match);
