@@ -39,7 +39,8 @@ void die(const char *message, struct Connection *conn)
         printf("ERROR: %s\n", message);
     }
     
-    Database_close(conn);
+    if (conn)
+        Database_close(conn);
     exit(1);
 }
 
