@@ -21,11 +21,14 @@ struct Address {
 };
 
 struct Database {
+    int max_rows;
+    int max_data;
     struct Address rows[MAX_ROWS];
 };
 
 struct Connection {
     FILE *file;
+    char *filename;
     struct Database *db;
 };
 
@@ -75,7 +78,8 @@ struct Connection *Database_open(const char *filename, char mode)
     }
 
     if(!conn->file) die("Failed to open the file", conn);
-
+    conn->filename = malloc(strlen(filename));
+    strncpy(conn->filename, filename, strlen(filename));
     return conn;
 }
 
@@ -84,6 +88,7 @@ void Database_close(struct Connection *conn)
     if(conn) {
         if(conn->file) fclose(conn->file);
         if(conn->db) free(conn->db);
+        if(conn->filename) free(conn->filename);
         free(conn);
     }
 }
@@ -91,20 +96,20 @@ void Database_close(struct Connection *conn)
 void Database_write(struct Connection *conn, int max_data, int max_rows)
 {
     rewind(conn->file);
-    printf("The sizeof Database struct it %lu\n", sizeof(struct Database));
-    printf("ID is %d\n", conn->db->rows[0].id);
-    printf("sizeof id is %lu\n", sizeof(conn->db->rows[0].id));
     int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
     if(rc != 1) die("Failed to write database.", conn);
 
     rc = fflush(conn->file);
     if(rc == -1) die("Cannot flush database.", conn);
+
+    printf("Successfully wrote database %s with %d rows of max. lenth %d\n",
+            conn->filename, conn->db->max_rows, max_data);
 }
 
 void Database_create(struct Connection *conn, int max_rows)
 {
     int i = 0;
-
+    conn->db->max_rows = max_rows;
     for(i = 0; i < max_rows; i++) {
         // make a prototype to initialize it
         struct Address addr = {.id = i, .set = 0};
@@ -174,8 +179,8 @@ int main(int argc, char *argv[])
     int max_rows = 0;
     int max_data = 0;
 
-    if(argc > 3) id = atoi(argv[3]);
-    if(id >= MAX_ROWS) die("There's not that many records.", conn);
+    //if(argc > 3) id = atoi(argv[3]);
+    //if(id >= MAX_ROWS) die("There's not that many records.", conn);
 
     switch(action) {
         case 'c':
@@ -185,6 +190,7 @@ int main(int argc, char *argv[])
             max_rows = atoi(argv[3]);
             max_data = atoi(argv[4]);
             Database_create(conn, max_rows);
+            
             Database_write(conn, max_data, max_rows);
             break;
 
