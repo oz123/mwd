@@ -103,13 +103,14 @@ void Database_write(struct Connection *conn, int max_data, int max_rows)
     if(rc == -1) die("Cannot flush database.", conn);
 
     printf("Successfully wrote database %s with %d rows of max. lenth %d\n",
-            conn->filename, conn->db->max_rows, max_data);
+            conn->filename, conn->db->max_rows, conn->db->max_data);
 }
 
-void Database_create(struct Connection *conn, int max_rows)
+void Database_create(struct Connection *conn, int max_rows, int max_data)
 {
     int i = 0;
     conn->db->max_rows = max_rows;
+    conn->db->max_data = max_data;
     for(i = 0; i < max_rows; i++) {
         // make a prototype to initialize it
         struct Address addr = {.id = i, .set = 0};
@@ -138,7 +139,7 @@ void Database_get(struct Connection *conn, int id)
 {
     struct Address *addr = &conn->db->rows[id];
 
-    if(addr->set) {
+    if((*addr).set) {
         Address_print(addr);
     } else {
         die("ID is not set", conn);
@@ -189,7 +190,7 @@ int main(int argc, char *argv[])
             
             max_rows = atoi(argv[3]);
             max_data = atoi(argv[4]);
-            Database_create(conn, max_rows);
+            Database_create(conn, max_rows, max_data);
             
             Database_write(conn, max_data, max_rows);
             break;
